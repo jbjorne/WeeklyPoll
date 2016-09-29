@@ -4,10 +4,10 @@ import urllib
 import datetime
 from splinter import Browser
 import json
+import time
 
 def clickButton(browser, label):
     buttons = browser.find_by_value(label)
-    print buttons
     clicked = False
     for button in buttons:
         try:
@@ -56,7 +56,15 @@ def makeDoodle(title, name, email, dates):
     for label in buttonLabels: 
         clickButton(browser, label)
     
-    link = browser.find_by_name("participationLink")["href"]
+    link = None
+    while link == None:
+        try:
+            link = browser.find_by_name("participationLink")
+        except:
+            print "Waiting for the link"
+            link = None
+            time.sleep(1)
+    link = link["href"]
     print "Link:", link
     adminLink = browser.find_by_name("adminLink")["href"]
     browser.visit(adminLink + "#notifications")
@@ -66,8 +74,8 @@ def makeDoodle(title, name, email, dates):
     browser.quit()
     return link, adminLink
 
-def makeDoodleForDate(title, name, email, date, time):
-    return makeDoodle(title, name, email, {date.strftime("%Y%m%d"):time})
+def makeDoodleForDate(title, name, email, date, timeOfDay):
+    return makeDoodle(title, name, email, {date.strftime("%Y%m%d"):timeOfDay})
 
 def getDates(weekday, fromDate, toDate):
     days = [fromDate + datetime.timedelta(x) for x in range(int ((toDate - fromDate).days))]
@@ -75,7 +83,7 @@ def getDates(weekday, fromDate, toDate):
     #print days #weekday, [x.weekday() for x in days]
     return days
 
-def makeDoodles(title, name, email, weekday, time, begin, end, dummy, output):
+def makeDoodles(output, title, name, email, weekday, timeOfDay, begin, end, dummy):
     dates = getDates(weekday, datetime.datetime.strptime(begin, "%Y%m%d"), datetime.datetime.strptime(end, "%Y%m%d"))
     print dates
     data = []
@@ -83,8 +91,10 @@ def makeDoodles(title, name, email, weekday, time, begin, end, dummy, output):
         print "Making poll for date", date
         link, adminLink = None, None
         if not dummy:
-            link, adminLink = makeDoodleForDate(title, name, email, date, time)
-        data.append({"date":date.strftime("%Y%m%d"), "link":link, "adminLink":adminLink, "weekday":weekday, "time":time, "title":title, "email":email})
+            weekdays = {0:"Mo", 1:"Tue", 2:"Wed", 3:"Thu", 4:"Fri", 5:"Sat", 6:"Sun"}
+            fullTitle = title + " ".join(["", weekdays[weekday], date.strftime("%d.%m.%Y"), "at", timeOfDay[0:2] + ":" + timeOfDay[2:]])
+            link, adminLink = makeDoodleForDate(fullTitle, name, email, date, timeOfDay)
+        data.append({"date":date.strftime("%Y%m%d"), "link":link, "adminLink":adminLink, "weekday":weekday, "time":timeOfDay, "title":fullTitle, "email":email})
     if len(data) > 0 and output != None:
         with open(output, 'w') as fp:
             json.dump(data, fp)
@@ -93,6 +103,7 @@ if __name__=="__main__":
     from optparse import OptionParser
     optparser = OptionParser(description="Batch process a tree of input files")
     optparser.add_option("-l", "--title", default=None)
+    #optparser.add_option("--extendTitle", default=False, action="store_true")
     optparser.add_option("-n", "--name", default=None)
     optparser.add_option("-m", "--email", default=None)
     optparser.add_option("-w", "--weekday", type=int, default=None)
@@ -103,5 +114,5 @@ if __name__=="__main__":
     optparser.add_option("-o", "--output", default=None)
     (options, args) = optparser.parse_args()
     
-    makeDoodles(options.title, options.name, options.email, options.weekday, options.time, options.begin, options.end, options.dummy, options.output)
+    makeDoodles(options.output, options.title, options.name, options.email, options.weekday, options.time, options.begin, options.end, options.dummy)
     
