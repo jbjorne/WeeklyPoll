@@ -34,8 +34,12 @@ for input in browser.find_by_tag("input"):
 # Add the email to the form (would requirea POST request with HTML arguments)
 inputs[labels["E-mail address"]].fill(DATA["email"])
 
-browser.find_by_value('Next')[0].click()
-time.sleep(3)
-browser.find_by_value('Next')[0].click()
-time.sleep(3)
-browser.find_by_value('Next')[0].click()
+#buttonLabel = 4 * ["Next"] + ["Finish"]
+for i in range(0,4): 
+    buttons = browser.find_by_value('Next')
+    print buttons
+    for button in buttons:
+        try:
+            button.click()
+        except:
+            pass
