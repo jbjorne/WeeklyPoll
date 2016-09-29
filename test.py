@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import urllib
-import time
+import datetime
 from splinter import Browser
 
 def clickButton(browser, label):
@@ -28,33 +28,65 @@ DATA = {
         "title":"Floorball",
         "20090703":"1500"}
 
-url = "http://doodle.com/create?"
-url += "&".join([key + "=" + urllib.quote(DATA[key]) for key in DATA.keys()])
-url += "&20090703=815&"
-print url
+def addVar(url, name, value):
+    return url + "&" + name + "=" + urllib.quote(value)
 
-browser = Browser()
-browser.visit(url)
-labels = {}
-#print browser.find_by_tag("value")
-#print browser.find_by_tag("input")
-for label in browser.find_by_tag("label"):
-    labels[label.text] = label["for"]
-inputs = {}
-for input in browser.find_by_tag("input"):
-    inputs[input["id"]] = input
+def makeDoodle(title, name, email, dates):
+    url = "http://doodle.com/create?"
+    url = addVar(url, "title", title)
+    url = addVar(url, "name", name)
+    for date in dates.keys():
+        url += "&" + date + "=" + dates[date]
+    print url
+    
+    browser = Browser()
+    browser.visit(url)
+    labels = {}
+    for label in browser.find_by_tag("label"):
+        labels[label.text] = label["for"]
+    inputs = {}
+    for input in browser.find_by_tag("input"):
+        inputs[input["id"]] = input
+    
+    # Add the email to the form (would requirea POST request with HTML arguments)
+    inputs[labels["E-mail address"]].fill(DATA["email"])
+    
+    buttonLabels = 4 * ["Next"] + ["Finish"]
+    for label in buttonLabels: 
+        clickButton(browser, label)
+    
+    link = browser.find_by_name("participationLink")
+    print "Link:", link["href"]
+    
+    adminLink = browser.find_by_name("adminLink")
+    browser.visit(adminLink["href"] + "#notifications")
+    browser.uncheck("followEvents")
+    browser.find_by_id("saveNotifications")[0].click()
+    
+    return (link["href"], adminLink["href"])
 
-# Add the email to the form (would requirea POST request with HTML arguments)
-inputs[labels["E-mail address"]].fill(DATA["email"])
+def makeDoodleForDate(title, name, email, date, time):
+    makeDoodle(title, name, email, {date.strftime("%Y%m%d"):time})
 
-buttonLabels = 4 * ["Next"] + ["Finish"]
-for label in buttonLabels: 
-    clickButton(browser, label)
+def getDates(weekday, fromDate, toDate):
+    days = [fromDate + datetime.timedelta(x) for x in range(int ((toDate - fromDate).days))]
+    days = [x for x in days if x.weekday() == weekday]
+    print days #weekday, [x.weekday() for x in days]
 
-link = browser.find_by_name("participationLink")
-print "Link:", link["href"]
+def makeDoodles(title, name, email, weekday, time, begin, end, dummy):
+    pass
 
-adminLink = browser.find_by_name("adminLink")
-browser.visit(adminLink["href"] + "#notifications")
-browser.uncheck("followEvents")
-browser.find_by_id("saveNotifications")[0].click()
+if __name__=="__main__":
+    from optparse import OptionParser
+    optparser = OptionParser(description="Batch process a tree of input files")
+    optparser.add_option("-n", "--name", default=None)
+    optparser.add_option("-l", "--title", default=None)
+    optparser.add_option("-w", "--weekday", type=int, default=None)
+    optparser.add_option("-t", "--time", default=None)
+    optparser.add_option("-b", "--begin", default=None)
+    optparser.add_option("-e", "--end", default=None)
+    optparser.add_option("-d", "--dummy", default=False, action="store_true")
+    (options, args) = optparser.parse_args()
+    
+    dates = getDates(options.weekday, datetime.datetime.strptime(options.begin, "%Y%m%d"), datetime.datetime.strptime(options.end, "%Y%m%d"))
+    
