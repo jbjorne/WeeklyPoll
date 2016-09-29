@@ -99,15 +99,15 @@ def makeDoodles(output, title, name, email, weekday, timeOfDay, begin, end, dumm
 if __name__=="__main__":
     from optparse import OptionParser
     optparser = OptionParser(description="Make a doodle for a recurring event")
-    optparser.add_option("-l", "--title", default=None)
+    optparser.add_option("-l", "--title", default=None, help="The poll title (time and date will be added to this automatically)")
     #optparser.add_option("--extendTitle", default=False, action="store_true")
-    optparser.add_option("-n", "--name", default=None)
-    optparser.add_option("-m", "--email", default=None)
-    optparser.add_option("-w", "--weekday", type=int, default=None)
-    optparser.add_option("-t", "--time", default=None)
-    optparser.add_option("-b", "--begin", default=None)
-    optparser.add_option("-e", "--end", default=None)
-    optparser.add_option("-d", "--dummy", default=False, action="store_true")
+    optparser.add_option("-n", "--name", default=None, help="Poll author's name")
+    optparser.add_option("-m", "--email", default=None, help="Poll author's email")
+    optparser.add_option("-w", "--weekday", type=int, default=None, help="The day of week for the poll. Format as YYYYMMDD")
+    optparser.add_option("-t", "--time", default=None, help="The time point during the day of week. Format as HHMM.")
+    optparser.add_option("-b", "--begin", default=None, help="The begin date for the date range for which polls are generated. Format YYYMMDD.")
+    optparser.add_option("-e", "--end", default=None, help="The end date for the date range for which polls are generated. Format YYYMMDD.")
+    optparser.add_option("-d", "--dummy", default=False, action="store_true", "Dummy mode for testing. No polls are generated.")
     optparser.add_option("-o", "--output", default=None)
     (options, args) = optparser.parse_args()
     

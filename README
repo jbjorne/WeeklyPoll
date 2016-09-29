@@ -1,1 +1,0 @@
-python test.py -b 20160929 -e 20161005 -w 1 -t 1500 -n "Owner" -m "owner@domain.com" -o doodles.json -l "Title"
