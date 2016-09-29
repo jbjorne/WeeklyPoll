@@ -22,6 +22,7 @@ def addVar(url, name, value):
     return url + "&" + name + "=" + urllib.quote(value)
 
 def makeDoodle(title, name, email, dates):
+    # Define the Doodle Poll Wizard URL and prefill as many fields as possible
     url = "http://doodle.com/create?"
     url = addVar(url, "title", title)
     url = addVar(url, "name", name)
@@ -29,8 +30,11 @@ def makeDoodle(title, name, email, dates):
         url += "&" + date + "=" + dates[date]
     print url
     
+    # Start the browser and go to the URL
     browser = Browser()
     browser.visit(url)
+    
+    # Collect input elements
     labels = {}
     for label in browser.find_by_tag("label"):
         labels[label.text] = label["for"]
@@ -41,12 +45,14 @@ def makeDoodle(title, name, email, dates):
     # Add the email to the form (would require a POST request with HTML arguments)
     inputs[labels["E-mail address"]].fill(email)
     
+    # Click through the pre-filled poll configuration pages
     buttonLabels = 4 * ["Next"] + ["Finish"]
     for label in buttonLabels: 
         clickButton(browser, label)
     
+    # Once the poll has been generated, save the link
     link = None
-    while link == None:
+    while link == None: # Wait for the poll to be generated
         try:
             link = browser.find_by_name("participationLink")
         except:
@@ -55,7 +61,9 @@ def makeDoodle(title, name, email, dates):
             time.sleep(1)
     link = link["href"]
     print "Link:", link
+    # Get the admin link for the poll
     adminLink = browser.find_by_name("adminLink")["href"]
+    # Disable poll notification emails
     browser.visit(adminLink + "#notifications")
     browser.uncheck("followEvents")
     browser.find_by_id("saveNotifications")[0].click()
@@ -67,6 +75,7 @@ def makeDoodleForDate(title, name, email, date, timeOfDay):
     return makeDoodle(title, name, email, {date.strftime("%Y%m%d"):timeOfDay})
 
 def getDates(weekday, fromDate, toDate):
+    # Get all dates corresponding to a weekday in a defined range
     days = [fromDate + datetime.timedelta(x) for x in range(int ((toDate - fromDate).days))]
     days = [x for x in days if x.weekday() == weekday]
     return days
