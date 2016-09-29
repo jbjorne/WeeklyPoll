@@ -3,6 +3,7 @@
 import urllib
 import datetime
 from splinter import Browser
+import json
 
 def clickButton(browser, label):
     buttons = browser.find_by_value(label)
@@ -55,18 +56,18 @@ def makeDoodle(title, name, email, dates):
     for label in buttonLabels: 
         clickButton(browser, label)
     
-    link = browser.find_by_name("participationLink")
-    print "Link:", link["href"]
-    
-    adminLink = browser.find_by_name("adminLink")
-    browser.visit(adminLink["href"] + "#notifications")
+    link = browser.find_by_name("participationLink")["href"]
+    print "Link:", link
+    adminLink = browser.find_by_name("adminLink")["href"]
+    browser.visit(adminLink + "#notifications")
     browser.uncheck("followEvents")
     browser.find_by_id("saveNotifications")[0].click()
     
-    return (link["href"], adminLink["href"])
+    browser.quit()
+    return link, adminLink
 
 def makeDoodleForDate(title, name, email, date, time):
-    makeDoodle(title, name, email, {date.strftime("%Y%m%d"):time})
+    return makeDoodle(title, name, email, {date.strftime("%Y%m%d"):time})
 
 def getDates(weekday, fromDate, toDate):
     days = [fromDate + datetime.timedelta(x) for x in range(int ((toDate - fromDate).days))]
@@ -74,16 +75,20 @@ def getDates(weekday, fromDate, toDate):
     #print days #weekday, [x.weekday() for x in days]
     return days
 
-def makeDoodles(title, name, email, weekday, time, begin, end, dummy):
-    dates = getDates(options.weekday, datetime.datetime.strptime(options.begin, "%Y%m%d"), datetime.datetime.strptime(options.end, "%Y%m%d"))
+def makeDoodles(title, name, email, weekday, time, begin, end, dummy, output):
+    dates = getDates(weekday, datetime.datetime.strptime(begin, "%Y%m%d"), datetime.datetime.strptime(end, "%Y%m%d"))
     print dates
     data = []
     for date in dates:
         print "Making poll for date", date
+        link, adminLink = None, None
         if not dummy:
             link, adminLink = makeDoodleForDate(title, name, email, date, time)
-        data.append({"date":date.strftime("%Y%m%d"))
-
+        data.append({"date":date.strftime("%Y%m%d"), "link":link, "adminLink":adminLink, "weekday":weekday, "time":time, "title":title, "email":email})
+    if len(data) > 0 and output != None:
+        with open(output, 'w') as fp:
+            json.dump(data, fp)
+    
 if __name__=="__main__":
     from optparse import OptionParser
     optparser = OptionParser(description="Batch process a tree of input files")
@@ -95,7 +100,8 @@ if __name__=="__main__":
     optparser.add_option("-b", "--begin", default=None)
     optparser.add_option("-e", "--end", default=None)
     optparser.add_option("-d", "--dummy", default=False, action="store_true")
+    optparser.add_option("-o", "--output", default=None)
     (options, args) = optparser.parse_args()
     
-    makeDoodles(options.title, options.name, options.email, options.weekday, options.time, options.begin, options.end, options.dummy)
+    makeDoodles(options.title, options.name, options.email, options.weekday, options.time, options.begin, options.end, options.dummy, options.output)
     
