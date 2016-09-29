@@ -15,24 +15,32 @@ def readEmails(emailPath):
         address = address.replace(">", "").strip()
         print name, address
         data.append({"name":name, "email":address})
+    data = sorted(data, key=lambda k: k['email']) 
     return data
 
 def runMailCommand(doodle, recipients, template, dummy):
-    command = u"mail -s '" + doodle["title"] + "'"
+    #command = u"mail -s '" + doodle["title"] + "'"
+    command = "sendmail -t"
+    addressString = ""
     for recipient in recipients:
+        if addressString != "":
+            addressString += ","
         if recipient["name"] != None:
-            command += " '" + recipient["name"] + " <" + recipient["email"] + ">'"
+            addressString += recipient["name"] + " <" + recipient["email"] + ">"
         else:
-            command += " " + recipient["email"]
+            addressString += "<" + recipient["email"] + ">"
     print "--------------------------"
     print command
     print "--------------------------"
+    template = template.replace("%recipients", addressString)
     template = template.replace("%doodle", doodle["link"])
+    date = datetime.datetime.strptime(doodle["date"] + doodle["time"], "%Y%m%d%H%M")
+    template = date.strftime(template.encode('utf-8')).decode('utf-8') # template = date.strftime(template)
     print template
     print "--------------------------"
     if not dummy:
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
-        return p.communicate(input=template)
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print p.communicate(input=template.encode('utf-8'))
 
 def sendMail(doodlesPath, emailPath, daysInAdvance, templatePath, dummy=False):
     emails = readEmails(options.emails)
