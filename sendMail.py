@@ -17,7 +17,7 @@ def readEmails(emailPath):
         data.append({"name":name, "email":address})
     return data
 
-def runMailCommand(doodle, recipients, template):
+def runMailCommand(doodle, recipients, template, dummy):
     command = u"mail -s '" + doodle["title"] + "'"
     for recipient in recipients:
         if recipient["name"] != None:
@@ -30,10 +30,11 @@ def runMailCommand(doodle, recipients, template):
     template = template.replace("%doodle", doodle["link"])
     print template
     print "--------------------------"
-    #p = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #return p.communicate(input=content)
+    if not dummy:
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
+        return p.communicate(input=template)
 
-def sendMail(doodlesPath, emailPath, daysInAdvance, templatePath):
+def sendMail(doodlesPath, emailPath, daysInAdvance, templatePath, dummy=False):
     emails = readEmails(options.emails)
     
     with open(doodlesPath) as f:    
@@ -56,8 +57,9 @@ def sendMail(doodlesPath, emailPath, daysInAdvance, templatePath):
         delta = date - today
         if delta.days <= daysInAdvance:
             print "Sending email now"
-            runMailCommand(doodle, emails, template)
-            #doodle["sent"] = True
+            runMailCommand(doodle, emails, template, dummy)
+            if not dummy:
+                doodle["sent"] = True
         else:
             print "checked, delta is", delta
     
@@ -67,12 +69,13 @@ def sendMail(doodlesPath, emailPath, daysInAdvance, templatePath):
 if __name__=="__main__":
     from optparse import OptionParser
     optparser = OptionParser(description="Batch process a tree of input files")
-    optparser.add_option("-d", "--doodles", default=None)
+    optparser.add_option("-l", "--doodles", default=None)
     optparser.add_option("-m", "--emails", default=None)
     optparser.add_option("-t", "--template", default=None)
     optparser.add_option("-s", "--days", type=int, default=None)
+    optparser.add_option("-d", "--dummy", default=False, action="store_true")
     (options, args) = optparser.parse_args()
     
     #sendMail = readEmails(options.emails)
-    sendMail(options.doodles, options.emails, options.days, options.template)
+    sendMail(options.doodles, options.emails, options.days, options.template, options.dummy)
     
