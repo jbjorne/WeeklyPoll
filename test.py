@@ -4,6 +4,19 @@ import urllib
 import time
 from splinter import Browser
 
+def clickButton(browser, label):
+    buttons = browser.find_by_value(label)
+    print buttons
+    clicked = False
+    for button in buttons:
+        try:
+            button.click()
+            clicked = True
+        except:
+            pass
+    if not clicked:
+        raise Exception("Button " + label + "not found")
+
 # args = [("type","date"), 
 #         ("title","Floorball"), 
 #         ("name","Jari Bjorne"), 
@@ -11,7 +24,7 @@ from splinter import Browser
 #
 DATA = {
         "name":"Jari",
-        "email":"jari.bjorne@utu.fi",
+        "email":"floorball_admin@mailinator.com",
         "title":"Floorball",
         "20090703":"1500"}
 
@@ -34,12 +47,14 @@ for input in browser.find_by_tag("input"):
 # Add the email to the form (would requirea POST request with HTML arguments)
 inputs[labels["E-mail address"]].fill(DATA["email"])
 
-#buttonLabel = 4 * ["Next"] + ["Finish"]
-for i in range(0,4): 
-    buttons = browser.find_by_value('Next')
-    print buttons
-    for button in buttons:
-        try:
-            button.click()
-        except:
-            pass
+buttonLabels = 4 * ["Next"] + ["Finish"]
+for label in buttonLabels: 
+    clickButton(browser, label)
+
+link = browser.find_by_name("participationLink")
+print "Link:", link["href"]
+
+adminLink = browser.find_by_name("adminLink")
+browser.visit(adminLink["href"] + "#notifications")
+browser.uncheck("followEvents")
+browser.find_by_id("saveNotifications")[0].click()
