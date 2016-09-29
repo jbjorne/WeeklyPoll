@@ -18,17 +18,6 @@ def clickButton(browser, label):
     if not clicked:
         raise Exception("Button " + label + "not found")
 
-# args = [("type","date"), 
-#         ("title","Floorball"), 
-#         ("name","Jari Bjorne"), 
-#         ("eMailAddress","jari.bjorne@utu.fi")]
-#
-# DATA = {
-#         "name":"Jari",
-#         "email":"floorball_admin@mailinator.com",
-#         "title":"Floorball",
-#         "20090703":"1500"}
-
 def addVar(url, name, value):
     return url + "&" + name + "=" + urllib.quote(value)
 
@@ -49,7 +38,7 @@ def makeDoodle(title, name, email, dates):
     for input in browser.find_by_tag("input"):
         inputs[input["id"]] = input
     
-    # Add the email to the form (would requirea POST request with HTML arguments)
+    # Add the email to the form (would require a POST request with HTML arguments)
     inputs[labels["E-mail address"]].fill(email)
     
     buttonLabels = 4 * ["Next"] + ["Finish"]
@@ -80,7 +69,6 @@ def makeDoodleForDate(title, name, email, date, timeOfDay):
 def getDates(weekday, fromDate, toDate):
     days = [fromDate + datetime.timedelta(x) for x in range(int ((toDate - fromDate).days))]
     days = [x for x in days if x.weekday() == weekday]
-    #print days #weekday, [x.weekday() for x in days]
     return days
 
 def makeDoodles(output, title, name, email, weekday, timeOfDay, begin, end, dummy):
@@ -101,7 +89,7 @@ def makeDoodles(output, title, name, email, weekday, timeOfDay, begin, end, dumm
     
 if __name__=="__main__":
     from optparse import OptionParser
-    optparser = OptionParser(description="Batch process a tree of input files")
+    optparser = OptionParser(description="Make a doodle for a recurring event")
     optparser.add_option("-l", "--title", default=None)
     #optparser.add_option("--extendTitle", default=False, action="store_true")
     optparser.add_option("-n", "--name", default=None)

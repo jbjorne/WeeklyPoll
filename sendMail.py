@@ -68,12 +68,12 @@ def sendMail(doodlesPath, emailPath, daysInAdvance, templatePath, dummy=False):
 
 if __name__=="__main__":
     from optparse import OptionParser
-    optparser = OptionParser(description="Batch process a tree of input files")
-    optparser.add_option("-l", "--doodles", default=None)
-    optparser.add_option("-m", "--emails", default=None)
-    optparser.add_option("-t", "--template", default=None)
-    optparser.add_option("-s", "--days", type=int, default=None)
-    optparser.add_option("-d", "--dummy", default=False, action="store_true")
+    optparser = OptionParser(description="Sends a notification email with a Doodle link.")
+    optparser.add_option("-l", "--doodles", default=None, help="JSON-formatted file of pre-generated Doodle links made with makeDoodles.py")
+    optparser.add_option("-m", "--emails", default=None, help="Recipient email addresses (comma separated list, either of the form 'Name <name@domain.com>' or just 'name@domain.com')")
+    optparser.add_option("-t", "--template", default=None, help="Email body. The string '%doodle' will be replaced with the corresponding Doodle link")
+    optparser.add_option("-s", "--days", type=int, default=None, help="How many days in advance to send the notification email")
+    optparser.add_option("-d", "--dummy", default=False, action="store_true", help="Don't send the mail, just print it on screen")
     (options, args) = optparser.parse_args()
     
     #sendMail = readEmails(options.emails)
