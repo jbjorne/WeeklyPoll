@@ -103,7 +103,7 @@ if __name__=="__main__":
     #optparser.add_option("--extendTitle", default=False, action="store_true")
     optparser.add_option("-n", "--name", default=None, help="Poll author's name")
     optparser.add_option("-m", "--email", default=None, help="Poll author's email")
-    optparser.add_option("-w", "--weekday", type=int, default=None, help="The day of week for the poll. Format as YYYYMMDD")
+    optparser.add_option("-w", "--weekday", type=int, default=None, help="The day of week for the poll (integer in the range 0-6)")
     optparser.add_option("-t", "--time", default=None, help="The time point during the day of week. Format as HHMM.")
     optparser.add_option("-b", "--begin", default=None, help="The begin date for the date range for which polls are generated. Format YYYMMDD.")
     optparser.add_option("-e", "--end", default=None, help="The end date for the date range for which polls are generated. Format YYYMMDD.")
