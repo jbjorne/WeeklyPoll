@@ -8,20 +8,16 @@ from splinter import Browser
 #         ("title","Floorball"), 
 #         ("name","Jari Bjorne"), 
 #         ("eMailAddress","jari.bjorne@utu.fi")]
-# 
-# url = u"http://doodle.com/create?"
-# url += "&".join([x[0] + "=" + urllib.quote(x[1]) for x in args[0:3]])
-# url += "&20090703=815&"
-# url += "&".join([x[0] + "=" + urllib.quote(x[1]) for x in args[3:]])
-
+#
 DATA = {
         "name":"Jari",
         "email":"jari.bjorne@utu.fi",
         "title":"Floorball",
-        "date":"20090703",
-        "time":"1500"}
+        "20090703":"1500"}
 
-url = "http://doodle.com/create"
+url = "http://doodle.com/create?"
+url += "&".join([key + "=" + urllib.quote(DATA[key]) for key in DATA.keys()])
+url += "&20090703=815&"
 print url
 
 browser = Browser()
@@ -35,7 +31,11 @@ inputs = {}
 for input in browser.find_by_tag("input"):
     inputs[input["id"]] = input
 
-inputs[labels["Title"]].fill(DATA["title"])
-inputs[labels["Your name"]].fill(DATA["name"])
+# Add the email to the form (would requirea POST request with HTML arguments)
 inputs[labels["E-mail address"]].fill(DATA["email"])
-#print browser.find_by_value('Next')
+
+browser.find_by_value('Next')[0].click()
+time.sleep(3)
+browser.find_by_value('Next')[0].click()
+time.sleep(3)
+browser.find_by_value('Next')[0].click()
