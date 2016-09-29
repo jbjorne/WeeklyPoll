@@ -55,11 +55,11 @@ def makeDoodle(title, name, email, dates):
     while link == None: # Wait for the poll to be generated
         try:
             link = browser.find_by_name("participationLink")
+            link = link["href"]
         except:
             print "Waiting for the link"
             link = None
             time.sleep(1)
-    link = link["href"]
     print "Link:", link
     # Get the admin link for the poll
     adminLink = browser.find_by_name("adminLink")["href"]
@@ -107,8 +107,8 @@ if __name__=="__main__":
     optparser.add_option("-t", "--time", default=None, help="The time point during the day of week. Format as HHMM.")
     optparser.add_option("-b", "--begin", default=None, help="The begin date for the date range for which polls are generated. Format YYYMMDD.")
     optparser.add_option("-e", "--end", default=None, help="The end date for the date range for which polls are generated. Format YYYMMDD.")
-    optparser.add_option("-d", "--dummy", default=False, action="store_true", "Dummy mode for testing. No polls are generated.")
-    optparser.add_option("-o", "--output", default=None)
+    optparser.add_option("-d", "--dummy", default=False, action="store_true", help="Dummy mode for testing. No polls are generated.")
+    optparser.add_option("-o", "--output", default=None, help="Output file path. Output fill be saved in JSON format and consists of a list of the generated Doodle polls.")
     (options, args) = optparser.parse_args()
     
     makeDoodles(options.output, options.title, options.name, options.email, options.weekday, options.time, options.begin, options.end, options.dummy)

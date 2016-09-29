@@ -8,7 +8,7 @@ emails are later sent with the appropriate links included.
 ## Generating the Doodle Polls
 
 Recurring Doodle polls are generated with the Splinter web automation toolkit.
-Splinter can be installed from PyPi as package 'splinter.
+Splinter can be installed from PyPi as package 'splinter'.
 
 To generate Doodle polls for the time point of 15:00 for Tuesdays between
 September 20th 2016 and October 20th 2016 the following command can be used:
@@ -55,3 +55,9 @@ Please tell if you will be attending my event: %doodle
 Cheers,
 Pollster
 ```
+
+## Automating Notification Emails
+
+The sending of notification emails with sendMail.py can be automated e.g. with a cron job. 
+The cron job can be run once per day, and sendMails.py will then send notifications for
+all Doodle's within the due date range.
