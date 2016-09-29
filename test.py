@@ -22,11 +22,11 @@ def clickButton(browser, label):
 #         ("name","Jari Bjorne"), 
 #         ("eMailAddress","jari.bjorne@utu.fi")]
 #
-DATA = {
-        "name":"Jari",
-        "email":"floorball_admin@mailinator.com",
-        "title":"Floorball",
-        "20090703":"1500"}
+# DATA = {
+#         "name":"Jari",
+#         "email":"floorball_admin@mailinator.com",
+#         "title":"Floorball",
+#         "20090703":"1500"}
 
 def addVar(url, name, value):
     return url + "&" + name + "=" + urllib.quote(value)
@@ -49,7 +49,7 @@ def makeDoodle(title, name, email, dates):
         inputs[input["id"]] = input
     
     # Add the email to the form (would requirea POST request with HTML arguments)
-    inputs[labels["E-mail address"]].fill(DATA["email"])
+    inputs[labels["E-mail address"]].fill(email)
     
     buttonLabels = 4 * ["Next"] + ["Finish"]
     for label in buttonLabels: 
@@ -71,16 +71,25 @@ def makeDoodleForDate(title, name, email, date, time):
 def getDates(weekday, fromDate, toDate):
     days = [fromDate + datetime.timedelta(x) for x in range(int ((toDate - fromDate).days))]
     days = [x for x in days if x.weekday() == weekday]
-    print days #weekday, [x.weekday() for x in days]
+    #print days #weekday, [x.weekday() for x in days]
+    return days
 
 def makeDoodles(title, name, email, weekday, time, begin, end, dummy):
-    pass
+    dates = getDates(options.weekday, datetime.datetime.strptime(options.begin, "%Y%m%d"), datetime.datetime.strptime(options.end, "%Y%m%d"))
+    print dates
+    data = []
+    for date in dates:
+        print "Making poll for date", date
+        if not dummy:
+            link, adminLink = makeDoodleForDate(title, name, email, date, time)
+        data.append({"date":date.strftime("%Y%m%d"))
 
 if __name__=="__main__":
     from optparse import OptionParser
     optparser = OptionParser(description="Batch process a tree of input files")
-    optparser.add_option("-n", "--name", default=None)
     optparser.add_option("-l", "--title", default=None)
+    optparser.add_option("-n", "--name", default=None)
+    optparser.add_option("-m", "--email", default=None)
     optparser.add_option("-w", "--weekday", type=int, default=None)
     optparser.add_option("-t", "--time", default=None)
     optparser.add_option("-b", "--begin", default=None)
@@ -88,5 +97,5 @@ if __name__=="__main__":
     optparser.add_option("-d", "--dummy", default=False, action="store_true")
     (options, args) = optparser.parse_args()
     
-    dates = getDates(options.weekday, datetime.datetime.strptime(options.begin, "%Y%m%d"), datetime.datetime.strptime(options.end, "%Y%m%d"))
+    makeDoodles(options.title, options.name, options.email, options.weekday, options.time, options.begin, options.end, options.dummy)
     
